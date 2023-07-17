@@ -5,6 +5,7 @@ const errorHandler = require('./middlewares/errorHandler');
 const { errorLogger, requestLogger } = require('./middlewares/logger');
 const router = require('./routes');
 const config = require('./config');
+const cors = require('./middlewares/cors');
 
 const { port, mongodbUrl } = config;
 const app = express();
@@ -15,6 +16,7 @@ mongoose.connect(mongodbUrl, {
 });
 app.use(express.json());
 app.use(cookieParser());
+app.use(cors);
 app.use(requestLogger);
 
 app.use(router);
