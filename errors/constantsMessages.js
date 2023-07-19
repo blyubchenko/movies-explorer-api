@@ -1,0 +1,16 @@
+module.exports = {
+  messageAuthRequired: 'Необходима авторизация',
+  messageInvalidEmail: 'Некорректный адрес электронной почты',
+  messageInvalidLink: 'Некорректная ссылка',
+  messageNoSavedMovies: 'Сохраненных фильмов нет',
+  messageMovieNotFound: 'Фильм с указанным _id не найден',
+  messageCannotDeleteOthersMovie: 'Нельзя удалять чужие фильмы',
+  messageMovieDeleted: 'Фильм удален',
+  messageInvalidData: 'Переданы некорректные данные',
+  messageServerError: 'На сервере произошла ошибка',
+  messageRateLimitExceeded: 'Превышен лимит запросов. Попробуйте позже.',
+  messageEmailAlreadyRegistered: 'Пользователь с таким email уже существует',
+  messageInvalidEmailOrPassword: 'Неверные почта или пароль',
+  messageSuccessful: ' выполнен',
+  messagePageNotFound: 'Страница не найдена',
+};

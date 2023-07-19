@@ -4,11 +4,16 @@ const { HTTP_CREATED, HTTP_OK } = require('../errors/statusErrors');
 const BadRequestError = require('../errors/badRequest');
 const NotFoundError = require('../errors/notFoundError');
 const ForbiddenError = require('../errors/forbiddenError');
+const messages = require('../errors/constantsMessages');
 
 const getMovies = (req, res, next) => {
-  Movie.find()
+  const ownerId = req.user._id;
+  Movie.find({ owner: ownerId })
     .populate('owner')
     .then((movies) => {
+      if (!movies || movies.length === 0) {
+        throw new NotFoundError(messages.messageNoSavedMovies);
+      }
       res.status(HTTP_OK).send(movies);
     })
     .catch(next);
@@ -22,7 +27,7 @@ const postMovies = (req, res, next) => {
     .then((movie) => res.status(HTTP_CREATED).send(movie))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        next(new BadRequestError('Переданы некорректные данные при публикации фильма'));
+        next(new BadRequestError(messages.messageInvalidData));
       } else {
         next(err);
       }
@@ -33,17 +38,17 @@ const deleteMovies = (req, res, next) => {
   Movie.findById(req.params.movieId)
     .then((movie) => {
       if (!movie) {
-        throw new NotFoundError('Фильм с указанным _id не найден');
+        throw new NotFoundError(messages.messageMovieNotFound);
       }
       if (JSON.stringify(movie.owner) !== JSON.stringify(req.user._id)) {
-        throw new ForbiddenError('Нельзя удалять чужие фильмы');
+        throw new ForbiddenError(messages.messageCannotDeleteOthersMovie);
       }
       return movie.deleteOne();
     })
-    .then(() => res.status(HTTP_OK).send({ message: 'Фильм удален' }))
+    .then(() => res.status(HTTP_OK).send({ message: messages.messageMovieDeleted }))
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
-        next(new BadRequestError('Переданы некорректные данные для удаления фильма'));
+        next(new BadRequestError(messages.messageInvalidData));
       } else {
         next(err);
       }

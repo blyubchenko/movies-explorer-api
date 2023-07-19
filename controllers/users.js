@@ -4,9 +4,9 @@ const mongoose = require('mongoose');
 const User = require('../models/user');
 const ConflictError = require('../errors/conflictError');
 const BadRequestError = require('../errors/badRequest');
-const UnauthorizedError = require('../errors/unauthorizedError');
 const { HTTP_OK } = require('../errors/statusErrors');
 const config = require('../config');
+const messages = require('../errors/constantsMessages');
 
 const { env, jwtSecret } = config;
 
@@ -22,8 +22,15 @@ const patchUsers = (req, res, next) => {
     new: true,
     runValidators: true,
   })
-    .then((user) => res.status(HTTP_OK).send({ user }))
-    .catch(next);
+    .then((user) => {
+      res.status(HTTP_OK).send({ user });
+    })
+    .catch((err) => {
+      if (err.code === 11000) {
+        return next(new ConflictError(messages.messageEmailAlreadyRegistered));
+      }
+      return next(err);
+    });
 };
 
 const createUser = (req, res, next) => {
@@ -39,10 +46,10 @@ const createUser = (req, res, next) => {
     }))
     .catch((err) => {
       if (err.code === 11000) {
-        return next(new ConflictError('Пользователь c указанным Email уже зарегистрирован'));
+        return next(new ConflictError(messages.messageEmailAlreadyRegistered));
       }
       if (err instanceof mongoose.Error.ValidationError) {
-        return next(new BadRequestError('Переданы некорректные данные при создании пользователя'));
+        return next(new BadRequestError(messages.messageInvalidData));
       }
       return next(err);
     });
@@ -53,12 +60,12 @@ const login = (req, res, next) => {
   return User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        throw new UnauthorizedError('Неверные почта или пароль');
+        throw new BadRequestError(messages.messageInvalidEmailOrPassword);
       }
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            throw new UnauthorizedError('Неверные почта или пароль');
+            throw new BadRequestError(messages.messageInvalidEmailOrPassword);
           }
           return user;
         });
@@ -74,7 +81,7 @@ const login = (req, res, next) => {
         httpOnly: true,
         sameSite: true,
       });
-      return res.status(HTTP_OK).send({ message: 'Вход выполнен' });
+      return res.status(HTTP_OK).send({ message: `Вход${messages.messageSuccessful}` });
     })
     .catch((err) => {
       next(err);
@@ -83,7 +90,7 @@ const login = (req, res, next) => {
 
 function logout(req, res) {
   res.cookie('jwt', '', { expires: new Date(0) });
-  return res.status(HTTP_OK).send({ message: 'Выход выполнен' });
+  return res.status(HTTP_OK).send({ message: `Выход${messages.messageSuccessful}` });
 }
 
 module.exports = {
