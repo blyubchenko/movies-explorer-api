@@ -11,8 +11,9 @@ const messages = require('../errors/constantsMessages');
 const { env, jwtSecret } = config;
 
 const getUsers = (req, res, next) => {
-  User.find({})
-    .then((users) => res.status(200).send(users))
+  const userId = req.user._id;
+  User.findById(userId)
+    .then((user) => res.status(200).send(user))
     .catch(next);
 };
 
