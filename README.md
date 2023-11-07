@@ -4,8 +4,8 @@
 
 
 ## Используемые технологии
-- [Node.js]
-- [Express] - веб-фреймворк для Node.js
+- Node.js
+- Express - веб-фреймворк для Node.js
 - MongoDB - база данных
 - Mongoose - ОРМ для MongoDB
 - JSON Web Token - авторизация
